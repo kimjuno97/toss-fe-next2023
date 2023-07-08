@@ -30,7 +30,10 @@ export function KeypadPage() {
         토스 보안키패드 기술과제
       </Txt>
       <Input label="비밀번호">
-        <Input.TextField onClick={keypadOnOffHandler('password', true)} />
+        <Input.TextField
+          onBlur={keypadOnOffHandler('password', false)}
+          onClick={keypadOnOffHandler('password', true)}
+        />
       </Input>
       {keypad && keypadToggle.password && (
         <EncryptionKeypad
@@ -40,8 +43,11 @@ export function KeypadPage() {
         ></EncryptionKeypad>
       )}
       <Spacing size={24} />
-      <Input label="비밀번호 확인" onClick={keypadOnOffHandler('passwordCheck', true)}>
-        <Input.TextField />
+      <Input label="비밀번호 확인">
+        <Input.TextField
+          onClick={keypadOnOffHandler('passwordCheck', true)}
+          onBlur={keypadOnOffHandler('passwordCheck', false)}
+        />
       </Input>
       {keypad && keypadToggle.passwordCheck && (
         <EncryptionKeypad
@@ -128,10 +134,10 @@ function EncryptionKeypad({ targetInput, keypad, keypadOnOffHandler }: Encryptio
           <p style={{ margin: '0px' }}>6자리로 입력해주세요</p>
         </div>
       </div>
-      <div
+      {/* <div
         style={{ position: 'fixed', top: 0, right: 0, left: 0, bottom: 0 }}
         onClick={keypadOnOffHandler(targetInput, false)}
-      ></div>
+      ></div> */}
     </>
   );
 }
