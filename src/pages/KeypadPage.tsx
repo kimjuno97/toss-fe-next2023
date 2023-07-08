@@ -13,13 +13,24 @@ export function KeypadPage() {
     passwordCheck: false,
   });
 
+  const [passwordInput, setPasswordInput] = useState({ password: '', passwordCheck: '' });
+  // const [encryptPassword, setEncryptPassword] = useState<number[][]>([]);
+
+  const inputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordInput(prev => ({ ...prev, [name]: value }));
+  };
+
   const keypadOnOffHandler = (targetInput: 'password' | 'passwordCheck', status: boolean) => () => {
     setKeypadToggle(prev => ({ ...prev, [targetInput]: status }));
   };
 
+  const encryptPasswordHandler = (targetIndex: number[]) => () => {
+    console.log(targetIndex);
+  };
+
   useEffect(() => {
     createKeypad().then(res => {
-      console.log(res);
       setCreateKey(res);
     });
   }, []);
@@ -31,8 +42,10 @@ export function KeypadPage() {
       </Txt>
       <Input label="비밀번호">
         <Input.TextField
-          onBlur={keypadOnOffHandler('password', false)}
+          name="password"
           onClick={keypadOnOffHandler('password', true)}
+          onChange={inputHandler}
+          value={passwordInput.password}
         />
       </Input>
       {keypad && keypadToggle.password && (
@@ -40,13 +53,16 @@ export function KeypadPage() {
           targetInput="password"
           keypad={keypad}
           keypadOnOffHandler={keypadOnOffHandler}
+          encryptPasswordHandler={encryptPasswordHandler}
         ></EncryptionKeypad>
       )}
       <Spacing size={24} />
       <Input label="비밀번호 확인">
         <Input.TextField
+          name="passwordCheck"
           onClick={keypadOnOffHandler('passwordCheck', true)}
-          onBlur={keypadOnOffHandler('passwordCheck', false)}
+          onChange={inputHandler}
+          value={passwordInput.passwordCheck}
         />
       </Input>
       {keypad && keypadToggle.passwordCheck && (
@@ -54,6 +70,7 @@ export function KeypadPage() {
           targetInput="passwordCheck"
           keypad={keypad}
           keypadOnOffHandler={keypadOnOffHandler}
+          encryptPasswordHandler={encryptPasswordHandler}
         ></EncryptionKeypad>
       )}
       <Spacing size={24} />
@@ -66,9 +83,10 @@ interface EncryptionKeypadProps {
   keypad: CreateKeypad;
   keypadOnOffHandler: (key: 'password' | 'passwordCheck', status: boolean) => () => void;
   targetInput: 'password' | 'passwordCheck';
+  encryptPasswordHandler: (targetIndex: number[]) => () => void;
 }
-
-function EncryptionKeypad({ targetInput, keypad, keypadOnOffHandler }: EncryptionKeypadProps) {
+/** keypad */
+function EncryptionKeypad({ targetInput, keypad, keypadOnOffHandler, encryptPasswordHandler }: EncryptionKeypadProps) {
   return (
     <>
       <div
@@ -94,6 +112,8 @@ function EncryptionKeypad({ targetInput, keypad, keypadOnOffHandler }: Encryptio
           {keypad?.keypad.svgGrid.map((el, rowIndex) => {
             return el.map((svg, columnIndex) => {
               const uniqueKey = rowIndex + '-' + columnIndex;
+              const targetIndex = [rowIndex, columnIndex];
+
               if (columnIndex === el.length - 1) {
                 return (
                   <>
@@ -107,6 +127,7 @@ function EncryptionKeypad({ targetInput, keypad, keypadOnOffHandler }: Encryptio
                         borderRadius: '5px',
                         color: colors.black,
                       }}
+                      onClick={encryptPasswordHandler(targetIndex)}
                       dangerouslySetInnerHTML={{ __html: svg }}
                     ></div>
                     <RightKeyPadButton onClick={keypadOnOffHandler(targetInput, false)} rowIndex={rowIndex} />
@@ -123,6 +144,7 @@ function EncryptionKeypad({ targetInput, keypad, keypadOnOffHandler }: Encryptio
                     borderRadius: '5px',
                   }}
                   key={uniqueKey}
+                  onClick={encryptPasswordHandler(targetIndex)}
                   dangerouslySetInnerHTML={{ __html: svg }}
                 ></div>
               );
@@ -134,20 +156,20 @@ function EncryptionKeypad({ targetInput, keypad, keypadOnOffHandler }: Encryptio
           <p style={{ margin: '0px' }}>6자리로 입력해주세요</p>
         </div>
       </div>
-      {/* <div
-        style={{ position: 'fixed', top: 0, right: 0, left: 0, bottom: 0 }}
-        onClick={keypadOnOffHandler(targetInput, false)}
-      ></div> */}
     </>
   );
 }
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface RightKeyPadButtonPros extends ButtonHTMLAttributes<HTMLButtonElement> {
   rowIndex: number;
 }
-
-function RightKeyPadButton({ rowIndex, ...props }: Props) {
-  const buttonStyle = { backgroundColor: colors.blue50, color: colors.blue700 };
+/** ←, 전체삭제, 확인 버튼 */
+function RightKeyPadButton({ rowIndex, ...props }: RightKeyPadButtonPros) {
+  const buttonStyle: React.CSSProperties = {
+    backgroundColor: colors.blue50,
+    color: colors.blue700,
+    fontSize: '13px',
+  };
   switch (rowIndex) {
     case 0:
       return <Button style={buttonStyle}>←</Button>;
